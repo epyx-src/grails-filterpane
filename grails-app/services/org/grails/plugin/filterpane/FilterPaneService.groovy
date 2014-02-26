@@ -8,12 +8,12 @@ class FilterPaneService {
 
     def grailsApplication
 
-    def filter(params, Class filterClass) {
-        doFilter(params, filterClass, false)
+    def filter(params, Class filterClass, rootCriteria=null) {
+        doFilter(params, filterClass, rootCriteria, false)
     }
 
-    def count(params, Class filterClass) {
-        doFilter(params, filterClass, true)
+    def count(params, Class filterClass, rootCriteria=null) {
+        doFilter(params, filterClass, rootCriteria, true)
     }
 
     private filterParse(criteria, domainClass, params, filterParams, filterOpParams, doCount) {
@@ -83,7 +83,7 @@ class FilterPaneService {
         result
     }
 
-    private doFilter(params, Class filterClass, Boolean doCount) {
+    private doFilter(params, Class filterClass, rootCriteria, Boolean doCount) {
         log.debug("filtering... params = ${params.toMapString()}")
         //def filterProperties = params?.filterProperties?.tokenize(',')
         def filterParams = params.filter ? params.filter : params
@@ -97,6 +97,10 @@ class FilterPaneService {
             def c = filterClass.createCriteria()
 
             def criteriaClosure = {
+				if (rootCriteria) {
+					rootCriteria.delegate = delegate
+					rootCriteria()
+				}
                 and {
                     filterParse(c, domainClass, params, filterParams, filterOpParams, doCount)
                 }
